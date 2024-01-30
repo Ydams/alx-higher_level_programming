@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-"""Solves the N-queens puzzle.
+"""This solves the N-queens puzzle.
 
-This determines all possible solutions to placing N
+It Determines all possible solutions to placing N
 N non-attacking queens on an NxN chessboard.
 
 Example:
