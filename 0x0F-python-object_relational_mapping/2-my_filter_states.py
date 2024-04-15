@@ -1,54 +1,27 @@
 #!/usr/bin/python3
-import MySQLdb
-import sys
+"""
+This script will take in an argument and
+displays all values in the states
+where `name` matches the argument
+from the database `hbtn_0e_0_usa`.
+"""
 
-def search_state_by_name(username, password, hbtn_0e_0_usa, state_name):
-    # Connect to MySQL server
-    db = MySQLdb.connect(
-        host="localhost",
-        port=3306,
-        user=username,
-        passwd=password,
-        db=database_name
-    )
+import MySQLdb as db
+from sys import argv
 
-    # Create a cursor object
-    cursor = db.cursor()
-
-    # SQL query to search for state by name
-    sql_query = """
-        SELECT * FROM states
-        WHERE name = %s
-        ORDER BY id ASC
+if __name__ == '__main__':
     """
+    Access to the database and get the states
+    from the database.
+    """
+    db_connect = db.connect(host="localhost", port=3306,
+                            user=argv[1], passwd=argv[2], db=argv[3])
+    db_cursor = db_connect.cursor()
 
-    try:
-        # Execute the SQL query with user input
-        cursor.execute(sql_query, (state_name,))
+    db_cursor.execute(
+        "SELECT * FROM states WHERE name LIKE BINARY '{}' ORDER BY \
+                        states.id ASC".format(argv[4]))
+    rows_selected = db_cursor.fetchall()
 
-        # Fetch all the rows
-        results = cursor.fetchall()
-
-        # Display results
-        for row in results:
-            print(row)
-
-    except MySQLdb.Error as e:
-        print("MySQL Error:", e)
-
-    finally:
-        # Close cursor and connection
-        cursor.close()
-        db.close()
-
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python script.py <username> <password> <hbtn_0e_0_usa> <state_name>")
-        sys.exit(1)
-
-    username = sys.argv[1]
-    password = sys.argv[2]
-    database_name = sys.argv[3]
-    state_name = sys.argv[4]
-
-    search_state_by_name(username, password, database_name, state_name)
+    for row in rows_selected:
+        print(row)

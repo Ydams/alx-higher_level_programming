@@ -1,53 +1,38 @@
 #!/usr/bin/python3
+"""
+This lists all states with a name starting with N (upper N) from the database
+hbtn_0e_0_usa sorted in ascending order by states.id
+"""
 import MySQLdb
 import sys
 
-def get_states_starting_with_n(username, password, hbtn_0e_0_usa):
-    # Connect to MySQL server
-    db = MySQLdb.connect(
-        host="localhost",
-        port=3306,
-        user=username,
-        passwd=password,
-        db=database_name
-    )
-
-    # Create a cursor object
-    cursor = db.cursor()
-
-    # SQL query to get states starting with 'N'
-    sql_query = """
-        SELECT * FROM states
-        WHERE name LIKE 'N%'
-        ORDER BY id ASC
-    """
-
-    try:
-        # Execute the SQL query
-        cursor.execute(sql_query)
-
-        # Fetch all the rows
-        results = cursor.fetchall()
-
-        # Display results
-        for row in results:
-            print(row)
-
-    except MySQLdb.Error as e:
-        print("MySQL Error:", e)
-
-    finally:
-        # Close cursor and connection
-        cursor.close()
-        db.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python script.py <username> <password> <database_name>")
+
+    mysql_username = sys.argv[1]
+    mysql_password = sys.argv[2]
+    db_name = sys.argv[3]
+
+    try:
+        conn = MySQLdb.connect(
+            host="localhost",
+            port=3306,
+            user=mysql_username,
+            passwd=mysql_password,
+            db=db_name,
+            charset="utf8"
+        )
+    except MySQLdb.Error as e:
+        print("Error connecting to database: {}".format(e))
         sys.exit(1)
 
-    username = sys.argv[1]
-    password = sys.argv[2]
-    database_name = sys.argv[3]
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM states WHERE name LIKE BINARY 'N%' \
+                ORDER BY states.id ASC")
+    rows = cur.fetchall()
 
-    get_states_starting_with_n(username, password, database_name)
+    for row in rows:
+        print(row)
+
+    cur.close()
+    conn.close()

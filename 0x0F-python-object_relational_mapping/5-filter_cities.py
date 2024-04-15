@@ -1,56 +1,40 @@
 #!/usr/bin/python3
-import MySQLdb
-import sys
+"""
+This script  takes in the name of a state
+as an argument and state all cities of that
+state, using the database `hbtn_0e_4_usa`.
+"""
 
-def list_cities_by_state(username, password, hbtn_0e_4_usa, state_name):
-    # Connect to MySQL server
-    db = MySQLdb.connect(
-        host="localhost",
-        port=3306,
-        user=username,
-        passwd=password,
-        db=database_name
-    )
-
-    # Create a cursor object
-    cursor = db.cursor()
-
-    # SQL query to list cities of a specific state in ascending order by id
-    sql_query = """
-        SELECT cities.id, cities.name, states.name
-        FROM cities
-        JOIN states ON cities.state_id = states.id
-        WHERE states.name = %s
-        ORDER BY cities.id ASC
-    """
-
-    try:
-        # Execute the SQL query with user input
-        cursor.execute(sql_query, (state_name,))
-
-        # Fetch all the rows
-        results = cursor.fetchall()
-
-        # Display results
-        for row in results:
-            print(row)
-
-    except MySQLdb.Error as e:
-        print("MySQL Error:", e)
-
-    finally:
-        # Close cursor and connection
-        cursor.close()
-        db.close()
+import MySQLdb as db
+from sys import argv
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python script.py <username> <password> <database_name> <state_name>")
-        sys.exit(1)
+    """
+    Access to the database and get the cities
+    from the database.
+    """
 
-    username = sys.argv[1]
-    password = sys.argv[2]
-    database_name = sys.argv[3]
-    state_name = sys.argv[4]
+    db_connect = db.connect(host="localhost", port=3306,
+                            user=argv[1], passwd=argv[2], db=argv[3])
 
-    list_cities_by_state(username, password, database_name, state_name)
+    with db_connect.cursor() as db_cursor:
+        db_cursor.execute("""
+            SELECT
+                cities.id, cities.name
+            FROM
+                cities
+            JOIN
+                states
+            ON
+                cities.state_id = states.id
+            WHERE
+                states.name LIKE BINARY %(state_name)s
+            ORDER BY
+                cities.id ASC
+        """, {
+            'state_name': argv[4]
+        })
+        rows_selected = db_cursor.fetchall()
+
+    if rows_selected is not None:
+        print(", ".join([row[1] for row in rows_selected]))
